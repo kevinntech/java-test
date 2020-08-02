@@ -11,7 +11,8 @@ class StudyTest {
     @DisplayName("스터디 만들기 ☆")
     void create_new_study(){
         Study study = new Study();
-        assertNotNull(study);
+        assertNotNull(study);   // study 인스턴스가 null이 아닌지 검증
+        assertEquals(StudyStatus.DRAFT, study.getStatus(), "스터디를 처음 만들면 상태 값이 DRAFT여야 한다");
         System.out.println("create");
     }
 
