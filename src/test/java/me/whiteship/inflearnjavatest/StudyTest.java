@@ -3,7 +3,10 @@ package me.whiteship.inflearnjavatest;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.*;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.converter.ArgumentConversionException;
+import org.junit.jupiter.params.converter.ConvertWith;
+import org.junit.jupiter.params.converter.SimpleArgumentConverter;
+import org.junit.jupiter.params.provider.*;
 
 import java.time.Duration;
 import java.util.function.Supplier;
@@ -41,9 +44,17 @@ class StudyTest {
     // 아래와 같은 문자열 4개를 반복적으로 테스트하는 코드를 작성한다.
     @DisplayName("스터디 만들기")
     @ParameterizedTest(name = "{index} {displayName} message = {0}")
-    @ValueSource(strings = {"날씨가", "많이" , "추워지고", "있네요."} )
-    void parameterizeTest(String message){ // 저 4개의 문자열을 각각 하나씩 받아주는 파라미터 정의
-        System.out.println(message);
+    @ValueSource(ints = {10, 20, 40} )
+    void parameterizeTest(@ConvertWith(StudyConverter.class) Study study){ // 숫자를 Study 타입으로 형 변환하고자 한다면 SimpleArgumentConverter를 이용
+        System.out.println(study.getLimit());
+    }
+
+    static class StudyConverter extends SimpleArgumentConverter{
+        @Override
+        protected Object convert(Object source, Class<?> targetType) throws ArgumentConversionException {
+            assertEquals(Study.class, targetType, "Can only convert to Study"); // 내가 변환 하려고 하는 타입(targetType)이 Study여야 한다.
+            return new Study(Integer.parseInt(source.toString()));
+        }
     }
 
     @BeforeAll
