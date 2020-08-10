@@ -2,8 +2,12 @@ package me.whiteship.inflearnjavatest;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.*;
+import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.aggregator.AggregateWith;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import org.junit.jupiter.params.aggregator.ArgumentsAggregationException;
+import org.junit.jupiter.params.aggregator.ArgumentsAggregator;
 import org.junit.jupiter.params.converter.ArgumentConversionException;
 import org.junit.jupiter.params.converter.ConvertWith;
 import org.junit.jupiter.params.converter.SimpleArgumentConverter;
@@ -46,16 +50,14 @@ class StudyTest {
     @DisplayName("스터디 만들기")
     @ParameterizedTest(name = "{index} {displayName} message = {0}")
     @CsvSource({"10, '자바 스터디'", "20, 스프링"})
-    void parameterizeTest(ArgumentsAccessor argumentsAccessor){ // 숫자를 Study 타입으로 형 변환하고자 한다면 SimpleArgumentConverter를 이용
-        Study study = new Study(argumentsAccessor.getInteger(0), argumentsAccessor.getString(1));
+    void parameterizeTest(@AggregateWith(StudyAggregator.class) Study study){ // 숫자를 Study 타입으로 형 변환하고자 한다면 SimpleArgumentConverter를 이용
         System.out.println(study);
     }
 
-    static class StudyConverter extends SimpleArgumentConverter{
+    static class StudyAggregator implements ArgumentsAggregator{
         @Override
-        protected Object convert(Object source, Class<?> targetType) throws ArgumentConversionException {
-            assertEquals(Study.class, targetType, "Can only convert to Study"); // 내가 변환 하려고 하는 타입(targetType)이 Study여야 한다.
-            return new Study(Integer.parseInt(source.toString()));
+        public Object aggregateArguments(ArgumentsAccessor accessor, ParameterContext context) throws ArgumentsAggregationException {
+            return new Study(accessor.getInteger(0), accessor.getString(1));
         }
     }
 
