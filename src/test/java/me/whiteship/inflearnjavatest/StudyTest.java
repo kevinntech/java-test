@@ -2,16 +2,8 @@ package me.whiteship.inflearnjavatest;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.*;
-import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.aggregator.AggregateWith;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
-import org.junit.jupiter.params.aggregator.ArgumentsAggregationException;
-import org.junit.jupiter.params.aggregator.ArgumentsAggregator;
-import org.junit.jupiter.params.converter.ArgumentConversionException;
-import org.junit.jupiter.params.converter.ConvertWith;
-import org.junit.jupiter.params.converter.SimpleArgumentConverter;
-import org.junit.jupiter.params.provider.*;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.Duration;
 import java.util.function.Supplier;
@@ -22,19 +14,25 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.junit.jupiter.api.Assumptions.assumingThat;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS) // 테스트 클래스 마다 인스턴스를 하나만 만들어 사용한다.
 class StudyTest {
+
+    int value = 1;
 
     @FastTest
     @DisplayName("스터디 만들기 fast")
     void create_new_study(){
-        Study actual = new Study(10);
+        System.out.println(this); // this를 출력하면 테스트 마다 현재 객체가 다르다는 것을 알 수 있다.
+        System.out.println(value++);
+        Study actual = new Study(1);
         assertThat(actual.getLimit()).isGreaterThan(0);
     }
 
     @SlowTest
     @DisplayName("스터디 만들기 slow")
     void create_new_study_again(){
-        System.out.println("create1");
+        System.out.println(this);
+        System.out.println("create1 " + value++);
     }
 
     // value : 반복 횟수, name : 반복 테스트 이름
@@ -49,16 +47,9 @@ class StudyTest {
     // 아래와 같은 문자열 4개를 반복적으로 테스트하는 코드를 작성한다.
     @DisplayName("스터디 만들기")
     @ParameterizedTest(name = "{index} {displayName} message = {0}")
-    @CsvSource({"10, '자바 스터디'", "20, 스프링"})
-    void parameterizeTest(@AggregateWith(StudyAggregator.class) Study study){ // 숫자를 Study 타입으로 형 변환하고자 한다면 SimpleArgumentConverter를 이용
-        System.out.println(study);
-    }
-
-    static class StudyAggregator implements ArgumentsAggregator{
-        @Override
-        public Object aggregateArguments(ArgumentsAccessor accessor, ParameterContext context) throws ArgumentsAggregationException {
-            return new Study(accessor.getInteger(0), accessor.getString(1));
-        }
+    @ValueSource(strings = {"날씨가", "많이" , "추워지고", "있네요."} )
+    void parameterizeTest(String message){ // 저 4개의 문자열을 각각 하나씩 받아주는 파라미터 정의
+        System.out.println(message);
     }
 
     @BeforeAll
